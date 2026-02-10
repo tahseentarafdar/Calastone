@@ -16,7 +16,7 @@ namespace UnitTests
         {
             var filter = new LessThan3Filter();
 
-            var result = filter.ShouldFilter(word);
+            var result = filter.ShouldExclude(word);
 
             Assert.That(result, Is.EqualTo(expectedResult));
         }

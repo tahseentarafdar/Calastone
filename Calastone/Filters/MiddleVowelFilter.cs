@@ -8,7 +8,7 @@ namespace Calastone.Filters
     {
         private static readonly char[] vowels = { 'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U' };
 
-        public bool ShouldFilter(string word)
+        public bool ShouldExclude(string word)
         {
             if(string.IsNullOrEmpty(word))
             {

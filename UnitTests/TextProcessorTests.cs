@@ -23,9 +23,9 @@ namespace UnitTests
             mockEmitter.Setup(e => e.Emit(It.IsAny<string>())).Callback<string>(text => sb.Append(text));
 
             var mockFilter1 = new Mock<IWordFilter>();
-            mockFilter1.Setup(f => f.ShouldFilter(It.IsAny<string>())).Returns<string>(text => text.Contains("box"));
+            mockFilter1.Setup(f => f.ShouldExclude(It.IsAny<string>())).Returns<string>(text => text.Contains("box"));
             var mockFilter2 = new Mock<IWordFilter>();
-            mockFilter2.Setup(f => f.ShouldFilter(It.IsAny<string>())).Returns<string>(text => text.Contains("hat"));
+            mockFilter2.Setup(f => f.ShouldExclude(It.IsAny<string>())).Returns<string>(text => text.Contains("hat"));
             var mockFilter3 = new Mock<IWordFilter>();
 
             //Run the code to test
@@ -38,9 +38,9 @@ namespace UnitTests
             Assert.That(sb.ToString(), Is.EqualTo(", mat ."));
 
             //Ensure subsequent filters are not called if an earlier filter has deemed the word should be excluded
-            mockFilter1.Verify(m => m.ShouldFilter(It.IsAny<string>()), Times.Exactly(3));
-            mockFilter2.Verify(m => m.ShouldFilter(It.IsAny<string>()), Times.Exactly(2));
-            mockFilter3.Verify(m => m.ShouldFilter(It.IsAny<string>()), Times.Once);
+            mockFilter1.Verify(m => m.ShouldExclude(It.IsAny<string>()), Times.Exactly(3));
+            mockFilter2.Verify(m => m.ShouldExclude(It.IsAny<string>()), Times.Exactly(2));
+            mockFilter3.Verify(m => m.ShouldExclude(It.IsAny<string>()), Times.Once);
         }
 
         [Test]
@@ -50,9 +50,9 @@ namespace UnitTests
             var mockEmitter = new Mock<ITextEmitter>();
             mockEmitter.Setup(e => e.Emit(It.IsAny<string>())).Callback<string>(text => sb.Append(text));
             var mockFilter1 = new Mock<IWordFilter>();
-            mockFilter1.Setup(f => f.ShouldFilter(It.IsAny<string>())).Returns<string>(text => text.Contains("box"));
+            mockFilter1.Setup(f => f.ShouldExclude(It.IsAny<string>())).Returns<string>(text => text.Contains("box"));
             var mockFilter2 = new Mock<IWordFilter>();
-            mockFilter2.Setup(f => f.ShouldFilter(It.IsAny<string>())).Returns<string>(text => text.Contains("hat"));
+            mockFilter2.Setup(f => f.ShouldExclude(It.IsAny<string>())).Returns<string>(text => text.Contains("hat"));
 
             //Run the code to test
             var textProcessor = new TextProcessor(mockEmitter.Object);

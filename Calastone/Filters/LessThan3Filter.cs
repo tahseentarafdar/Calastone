@@ -4,16 +4,16 @@ using System.Text;
 
 namespace Calastone.Filters
 {
-    public class TFilter : IWordFilter
+    public class LessThan3Filter : IWordFilter
     {
-        public bool ShouldFilter(string word)
+        public bool ShouldExclude(string word)
         {
             if(string.IsNullOrEmpty(word))
             {
-                return false;
+                return true;
             }
 
-            return word.Contains('t') || word.Contains('T');
+            return word.Length < 3;
         }
     }
 }

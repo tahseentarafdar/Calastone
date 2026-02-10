@@ -27,7 +27,7 @@ namespace Calastone
                     if(wordBuffer.Length > 0)
                     {
                         var currentWord = wordBuffer.ToString();
-                        if (!filters.Any(f => f.ShouldFilter(currentWord)))
+                        if (!filters.Any(f => f.ShouldExclude(currentWord)))
                         {
                             _textEmitter.Emit(currentWord);
                         }
@@ -44,7 +44,7 @@ namespace Calastone
             if (wordBuffer.Length > 0)
             {
                 var currentWord = wordBuffer.ToString();
-                if (!filters.Any(f => f.ShouldFilter(currentWord)))
+                if (!filters.Any(f => f.ShouldExclude(currentWord)))
                 {
                     _textEmitter.Emit(currentWord);
                 }

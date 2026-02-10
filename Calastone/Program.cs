@@ -18,7 +18,11 @@ namespace Calastone
             IServiceProvider provider = container.BuildServiceProvider();
 
             var textProcessor = provider.GetService<ITextProcessor>();
-            var filters = new List<IWordFilter>() { new LessThan3Filter(), new TFilter(), new MiddleVowelFilter() };
+
+            var filters = new List<IWordFilter>() { 
+                new LessThan3Filter(), 
+                new TFilter(), 
+                new MiddleVowelFilter() };
 
             using (StreamReader reader = new StreamReader(@"Data\Text.txt"))
             {

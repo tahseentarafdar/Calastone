@@ -20,8 +20,8 @@ namespace Calastone
             var wordBuffer = new StringBuilder();
             int charInt; 
             while ((charInt = reader.Read()) != -1)
-            { 
-                char c = (char)charInt; 
+            {
+                var c = (char)charInt; 
                 if(char.IsPunctuation(c) || char.IsWhiteSpace(c))
                 {
                     if(wordBuffer.Length > 0)

@@ -4,3 +4,6 @@
 
 /.vs
 /Calastone/obj
+/Calastone/bin/Debug/net10.0
+/UnitTests/bin/Debug/net10.0
+/UnitTests/obj

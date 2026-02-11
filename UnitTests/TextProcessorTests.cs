@@ -1,7 +1,8 @@
 ﻿using Calastone;
 using Calastone.Filters;
-using NUnit.Framework;
 using Moq;
+using NUnit.Framework;
+using System.Diagnostics;
 using System.Text;
 
 namespace UnitTests
@@ -15,26 +16,36 @@ namespace UnitTests
             return new StreamReader(stream);
         }
 
+        private ITextEmitter CreateTextEmitterMock(StringBuilder sb)
+        {
+            var mockEmitter = new Mock<ITextEmitter>();
+            mockEmitter.Setup(e => e.Emit(It.IsAny<string>())).Callback<string>(text => sb.Append(text));
+            return mockEmitter.Object;
+        }
+
+        private Mock<IWordFilter> CreateWordFilterMock(string filterWord)
+        {
+            var mockFilter1 = new Mock<IWordFilter>();
+            mockFilter1.Setup(f => f.ShouldExclude(It.IsAny<string>())).Returns<string>(text => text.Contains(filterWord));
+            return mockFilter1;
+        }
+
         [Test]
         public void FiltersCalledCorrectly()
         {
             var sb = new StringBuilder();
-            var mockEmitter = new Mock<ITextEmitter>();
-            mockEmitter.Setup(e => e.Emit(It.IsAny<string>())).Callback<string>(text => sb.Append(text));
 
-            var mockFilter1 = new Mock<IWordFilter>();
-            mockFilter1.Setup(f => f.ShouldExclude(It.IsAny<string>())).Returns<string>(text => text.Contains("box"));
-            var mockFilter2 = new Mock<IWordFilter>();
-            mockFilter2.Setup(f => f.ShouldExclude(It.IsAny<string>())).Returns<string>(text => text.Contains("hat"));
-            var mockFilter3 = new Mock<IWordFilter>();
+            var mockEmitter = CreateTextEmitterMock(sb);
 
-            //Run the code to test
-            var textProcessor = new TextProcessor(mockEmitter.Object);
+            var mockFilter1 = CreateWordFilterMock("box");
+            var mockFilter2 = CreateWordFilterMock("hat");
+            var mockFilter3 = CreateWordFilterMock("xxx");
+
+            var textProcessor = new TextProcessor(mockEmitter);
             var textReader = CreateStreamReader("hat, mat box.");
             var filters = new List<IWordFilter>() { mockFilter1.Object, mockFilter2.Object, mockFilter3.Object };
             textProcessor.Process(textReader, filters);
 
-            //Ensure we have emitted the expected text
             Assert.That(sb.ToString(), Is.EqualTo(", mat ."));
 
             //Ensure subsequent filters are not called if an earlier filter has deemed the word should be excluded
@@ -47,21 +58,56 @@ namespace UnitTests
         public void PuncuationsHandledCorrectly()
         {
             var sb = new StringBuilder();
-            var mockEmitter = new Mock<ITextEmitter>();
-            mockEmitter.Setup(e => e.Emit(It.IsAny<string>())).Callback<string>(text => sb.Append(text));
-            var mockFilter1 = new Mock<IWordFilter>();
-            mockFilter1.Setup(f => f.ShouldExclude(It.IsAny<string>())).Returns<string>(text => text.Contains("box"));
-            var mockFilter2 = new Mock<IWordFilter>();
-            mockFilter2.Setup(f => f.ShouldExclude(It.IsAny<string>())).Returns<string>(text => text.Contains("hat"));
+            var mockEmitter = CreateTextEmitterMock(sb);
 
-            //Run the code to test
-            var textProcessor = new TextProcessor(mockEmitter.Object);
+            var mockFilter1 = CreateWordFilterMock("box");
+            var mockFilter2 = CreateWordFilterMock("hat");
+
+            var textProcessor = new TextProcessor(mockEmitter);
             var textReader = CreateStreamReader("The hat, scarf and bag - were (placed) in the (box)!");
             var filters = new List<IWordFilter>() { mockFilter1.Object, mockFilter2.Object };
             textProcessor.Process(textReader, filters);
 
-            //Ensure we have emitted the expected text
             Assert.That(sb.ToString(), Is.EqualTo("The , scarf and bag - were (placed) in the ()!"));
+        }
+
+        [Test]
+        public void NoFiltersEmitsAllWords()
+        {
+            var sb = new StringBuilder();
+            var mockEmitter = CreateTextEmitterMock(sb);
+            var processor = new TextProcessor(mockEmitter);
+
+            var textReader = CreateStreamReader("one two three");
+            processor.Process(textReader, Enumerable.Empty<IWordFilter>());
+
+            Assert.That(sb.ToString(), Is.EqualTo("one two three"));
+        }
+
+        [Test]
+        public void ThrowsOnInvalidArgumentsInProcess()
+        {
+            var sb = new StringBuilder();
+            var mockEmitter = CreateTextEmitterMock(sb);
+            var textProcessor = new TextProcessor(mockEmitter);
+
+            Assert.That(
+                () => textProcessor.Process(null, new List<IWordFilter>()), 
+                Throws.TypeOf<ArgumentNullException>().With.Property("ParamName").EqualTo("reader"));
+
+            var streamReader = new StreamReader(new MemoryStream());
+            Assert.That(
+                () => textProcessor.Process(streamReader, null),
+                Throws.TypeOf<ArgumentNullException>().With.Property("ParamName").EqualTo("filters"));
+        }
+
+
+        [Test]
+        public void ThrowsOnInvalidArgumentsInCreation()
+        {
+            Assert.That(
+                () => new TextProcessor(null),
+                Throws.TypeOf<ArgumentNullException>().With.Property("ParamName").EqualTo("textEmitter"));
         }
     }
 }
